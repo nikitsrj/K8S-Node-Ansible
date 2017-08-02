@@ -24,8 +24,8 @@
 
 - debug: msg="{{Master_IP.stdout}}"
 
-vars: 
-  MASTERPRIVATEIP: {{ Master_IP.stdout }}
+  vars: 
+    MASTERPRIVATEIP: "{{ Master_IP.stdout }}"
 
 - name: Fetching Node's IP.
   shell: curl http://169.254.169.254/latest/meta-data/local-ipv4
@@ -33,8 +33,8 @@ vars:
 
 - debug: msg="{{Node_IP.stdout}}"
 
-vars:
-  NODE: {{ Node_IP.stdout }}
+  vars:
+    NODE: "{{ Node_IP.stdout }}"
 
 - name: Configure etcd server for flannel service
   lineinfile:
