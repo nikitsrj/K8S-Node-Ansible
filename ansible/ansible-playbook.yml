@@ -1,0 +1,15 @@
+---
+#- hosts: kubemaster
+#  vars:
+#    MASTERPRIVATEIP:  
+#
+#  roles:
+#    - kube-master
+
+- hosts: localhost
+#  vars:
+#    MASTERPRIVATEIP: 
+#    NODE: 
+
+  roles:
+    - kube-node

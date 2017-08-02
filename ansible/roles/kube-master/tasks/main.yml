@@ -1,0 +1,74 @@
+---
+# tasks file for kube-master
+- name: upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+
+- name: install epel release for centos7
+  yum: pkg=epel-release state=installed
+
+- name: install required packages
+  yum: pkg={{item}} state=installed
+  with_items:
+   - etcd
+   - kubernetes
+   - wget
+   - curl
+   - ntp
+
+- name: Configure etcd to listen to all IP Address.
+  lineinfile:
+    dest: /etc/etcd/etcd.conf
+    regexp: 'ETCD_LISTEN_CLIENT_URLS\=\"http\:\/\/127\.0\.0\.1\:2379\"'
+    line: 'ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Configure Kubernetes API
+  lineinfile:
+    dest: /etc/kubernetes/apiserver
+    regexp: 'KUBE_API_ADDRESS\=\"\--insecure\-bind\-address\=127\.0\.0\.1"'
+    line: 'KUBE_API_ADDRESS="--address=0.0.0.0"'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Configure KUBE_API_PORT
+  lineinfile:
+    dest: /etc/kubernetes/apiserver
+    regexp: '\# KUBE_API_PORT\="\--port\=8080"'
+    line: 'KUBE_API_PORT="--port=8080"'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Configure KUBELET_PORT
+  lineinfile:
+    dest: /etc/kubernetes/apiserver
+    regexp: '\# KUBELET_PORT\="\--kubelet\-port\=10250"'
+    line: 'KUBELET_PORT="--kubelet-port=10250"'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Restart kubernetes master services
+  command: systemctl restart "{{ item }}"
+  with_items:
+    - etcd
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+
+- name: Enable kubernetes master services to restart on boot
+  command: systemctl enable "{{ item }}"
+  with_items:
+    - etcd
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+
+- name: Define flannel network configuration in etcd.
+  command: etcdctl mk /atomic.io/network/config '{"Network":"172.17.0.0/16"}'
+  ignore_errors: yes
