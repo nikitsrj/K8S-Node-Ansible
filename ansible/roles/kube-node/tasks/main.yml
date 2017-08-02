@@ -17,14 +17,15 @@
     - telnet
     - wget
     - ntp
+ 
 
 - name: Fetching Master's IP.
   shell: dig +short kubernetes.mediaiqdigital.com
   register: Master_IP
 
 - debug: msg="{{Master_IP.stdout}}"
-
-  vars: 
+- name: Set Master IP
+  set_fact:
     MASTERPRIVATEIP: "{{ Master_IP.stdout }}"
 
 - name: Fetching Node's IP.
@@ -33,7 +34,9 @@
 
 - debug: msg="{{Node_IP.stdout}}"
 
-  vars:
+
+- name: Set Node IP
+  set_fact:
     NODE: "{{ Node_IP.stdout }}"
 
 - name: Configure etcd server for flannel service
